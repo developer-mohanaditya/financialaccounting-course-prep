@@ -1,0 +1,32 @@
+{
+  "name": "fa-mock-exam-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --configLoader native",
+    "dev:start": "node scripts/dev-server.mjs start",
+    "dev:stop": "node scripts/dev-server.mjs stop",
+    "dev:status": "node scripts/dev-server.mjs status",
+    "dev:restart": "node scripts/dev-server.mjs restart",
+    "build": "tsc -b && vite build --configLoader native",
+    "preview": "vite preview --configLoader native",
+    "typecheck": "tsc -b",
+    "verify:exams": "node scripts/verify-exams.mjs",
+    "verify:grading": "node scripts/verify-grading.mjs",
+    "preview:single": "node scripts/build-single-file.mjs",
+    "check": "npm run typecheck && npm run verify:exams && npm run verify:grading && npm run build"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "pdfjs-dist": "^4.10.38",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7"
+  }
+}

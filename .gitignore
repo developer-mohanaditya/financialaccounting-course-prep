@@ -1,0 +1,27 @@
+# Dependencies and build output
+node_modules/
+dist/
+
+# Runtime files written by scripts/dev-server.mjs
+.dev/
+
+# Plain-text extractions of the supplied course handouts, used while authoring
+.extract/
+
+# Course material supplied by the professor (session slides, examination training
+# handout, exercise cases, previous year's quiz and corrigé). Copyrighted: kept on
+# disk for authoring the mock exams, but never committed or published.
+Financial Accounting/
+
+# Portable single-file build
+preview/studio.html
+
+# Scratch output of the verification scripts
+.verify/
+
+# Local agent metadata
+.freebuff/
+
+# Editor and OS noise
+.DS_Store
+*.log
