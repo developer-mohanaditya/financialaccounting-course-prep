@@ -5,20 +5,17 @@ import { IconCheck, IconCross, IconLock } from '../components/Icons';
 import { formatAmount, formatIsoDate, formatPoints, parseAmount } from '../lib/format';
 import { explanationLines } from '../lib/types';
 import type { CellFeedback, LineFeedback, MockExam, QuestionDef, QuestionResult } from '../lib/types';
-import { blankAnswers } from '../data/examKit';
-import { gradeExam } from '../lib/grading';
 
-export function ExamReview({ exam, authorMode = false }: { exam: MockExam; authorMode?: boolean }) {
+export function ExamReview({ exam }: { exam: MockExam }) {
   const { attemptFor, answersFor, navigate, states } = useStudio();
   const attempt = attemptFor(exam.id);
   const state = states.find((entry) => entry.exam.id === exam.id)!;
   const graded = attempt?.result ?? null;
 
-  /**
-   * In the console the key is shown on its own, with no submitted answers to
-   * compare against, so the review is built from a blank sheet.
-   */
-  const result = graded ?? (authorMode ? gradeExam(exam, blankAnswers(exam)) : null);
+  // The marks shown here were computed on the server when the paper was handed
+  // in. This page only reads that result: it has no key of its own, and could
+  // not recompute one if it wanted to.
+  const result = graded;
   const showMine = graded !== null;
 
   if (!result) {

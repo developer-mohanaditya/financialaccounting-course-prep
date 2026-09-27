@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useStudio, type Route } from '../../state/StudioContext';
 import { leaveAuthorRoute } from '../../lib/author';
+import { useAuthorPapers } from '../../lib/useAuthorPapers';
 import { formatPoints } from '../../lib/format';
-import { AuthorExam } from './AuthorExam';
+import { AuthorExam, type Tab } from './AuthorExam';
 import { IconCheck, IconLock } from '../../components/Icons';
 
 /**
@@ -11,10 +12,49 @@ import { IconCheck, IconLock } from '../../components/Icons';
  * Reachable only by its URL, listed nowhere, and linked from nowhere in the study
  * interface. Every paper is readable here in full — question paper, answer key and
  * marking notes — without an attempt, a grade or an unlocked sequence.
+ *
+ * The papers are fetched from the server rather than read from the bundle: the
+ * study interface's own copy is redacted, and the key exists nowhere in this
+ * browser until the server chooses to send it.
  */
 export function AuthorConsole() {
-  const { exams, navigate, revokeAuthor, author, signedIn, signIn } = useStudio();
+  const { navigate, revokeAuthor, author, signedIn, signIn } = useStudio();
+  const { papers: exams, loading, error } = useAuthorPapers();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>('paper');
+
+  if (error) {
+    return (
+      <div className="console">
+        <header className="console-bar">
+          <div className="console-bar-inner">
+            <div className="grow">
+              <div className="tb-title">Content review</div>
+              <div className="tb-meta">{author ? author.email : ''}</div>
+            </div>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={revokeAuthor}>
+              End session
+            </button>
+          </div>
+        </header>
+        <div className="console-pad">
+          <div className="callout callout-danger" role="alert">
+            {error}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading && exams.length === 0) {
+    return (
+      <div className="console">
+        <div className="console-pad">
+          <p className="muted small">Loading the papers…</p>
+        </div>
+      </div>
+    );
+  }
 
   /**
    * Leave the console and land on an ordinary studio page. Studio pages need a
@@ -33,9 +73,10 @@ export function AuthorConsole() {
     return (
       <AuthorExam
         exam={selected}
+        tab={tab}
+        onTabChange={setTab}
         onBack={() => setSelectedId(null)}
         onOpenPaper={() => openInStudio({ name: 'exam', examId: selected.id, take: true })}
-        onOpenSolutions={() => openInStudio({ name: 'review', examId: selected.id })}
       />
     );
   }

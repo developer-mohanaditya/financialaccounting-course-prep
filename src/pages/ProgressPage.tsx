@@ -2,7 +2,7 @@ import { useStudio } from '../state/StudioContext';
 import { StatusBadge } from '../components/StatusBadge';
 import { formatDuration, formatLocalDateTime, formatPoints } from '../lib/format';
 import { scoreSeries } from '../lib/progress';
-import { examProgress } from '../lib/grading';
+import { examProgress } from '../lib/meters';
 
 export function ProgressPage() {
   const { states, summary, navigate, answersFor } = useStudio();

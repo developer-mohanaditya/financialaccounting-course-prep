@@ -21,6 +21,12 @@ if (!jsFile) throw new Error('No JavaScript bundle found in dist/assets');
 const js = readFileSync(path.join(assetsDir, jsFile), 'utf8');
 const css = cssFile ? readFileSync(path.join(assetsDir, cssFile), 'utf8') : '';
 
+// The favicon has to travel inside the file too, so the portable copy is not the
+// one build that opens with a blank tab icon. The single file has no public/
+// directory to reach into, hence the data URI.
+const favicon = readFileSync(path.join(root, 'public', 'favicon.svg'));
+const faviconHref = `data:image/svg+xml;base64,${favicon.toString('base64')}`;
+
 const html = `<!doctype html>
 <html lang="en" data-theme="system">
   <head>
@@ -32,6 +38,9 @@ const html = `<!doctype html>
       name="description"
       content="A browser-only workspace for practising financial accounting mock exams, with local progress saved in your browser."
     />
+    <link rel="icon" type="image/svg+xml" sizes="any" href="${faviconHref}" />
+    <meta name="theme-color" content="#f4f6f9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
     <style>${css}</style>
   </head>
   <body>

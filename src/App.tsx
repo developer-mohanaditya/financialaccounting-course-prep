@@ -11,7 +11,7 @@ import { ProgressPage } from './pages/ProgressPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AuthorConsole } from './pages/author/AuthorConsole';
 import { AuthorGate } from './pages/author/AuthorGate';
-import { useAuthorRoute } from './lib/author';
+import { authorConsoleEnabled, useAuthorRoute } from './lib/author';
 import { IconMenu } from './components/Icons';
 
 export function App() {
@@ -52,8 +52,9 @@ export function App() {
   }
 
   // The content console stands on its own: it needs no study session, and the
-  // study interface never points at it.
-  if (consoleRoute) {
+  // study interface never points at it. A build made without author credentials
+  // has no console to reach, so the address means nothing there.
+  if (authorConsoleEnabled && consoleRoute) {
     return authorMode ? <AuthorConsole /> : <AuthorGate />;
   }
 
@@ -112,7 +113,7 @@ export function App() {
             {route.name === 'settings' && <SettingsPage />}
             {route.name === 'exam' && exam && !route.take && <ExamOverview exam={exam} />}
             {route.name === 'results' && exam && <ExamResults exam={exam} />}
-            {route.name === 'review' && exam && <ExamReview exam={exam} authorMode={authorMode} />}
+            {route.name === 'review' && exam && <ExamReview exam={exam} />}
           </div>
         )}
 

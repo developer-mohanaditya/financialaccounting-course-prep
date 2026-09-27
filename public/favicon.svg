@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="FA Mock Exam Studio">
+  <title>FA Mock Exam Studio</title>
+
+  <!--
+    The mark is the studio's subject in three shapes: a ledger sheet, ruled
+    lines, and a bottom pair of equal bars for the debit and credit totals that
+    have to agree. It is drawn, not typeset, so it renders identically without
+    depending on a font being present.
+
+    The colours are the app's own palette (navy 800/900, accent, paper), and the
+    media query below follows the operating system's preference. An SVG loaded
+    as an image cannot see the page's data-theme, so this is the one place the
+    system preference, and not the in-app one, decides.
+
+    Every shape also carries its colour as a plain attribute. A presentation
+    attribute loses to CSS, so the rules above still win when they load, and the
+    tile is still navy if they ever do not: a favicon that renders as nothing is
+    worse than one that renders in the wrong theme.
+
+    Keep the double hyphen out of these comments. It is illegal inside an XML
+    comment, and a single one anywhere in the file stops browsers rendering the
+    icon at all, silently.
+  -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#223c60" />
+      <stop offset="1" stop-color="#0d1729" />
+    </linearGradient>
+    <linearGradient id="tile-dark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#33517c" />
+      <stop offset="1" stop-color="#17263d" />
+    </linearGradient>
+
+    <style>
+      .tile   { fill: url(#tile); }
+      .sheet  { fill: #ffffff; }
+      .rule   { fill: #26456b; }
+      .credit { fill: #0f6f6a; }
+
+      @media (prefers-color-scheme: dark) {
+        /* A dark tab bar swallows the light-mode navy, so the tile lifts and the
+           sheet comes off pure white to stop it glaring. */
+        .tile   { fill: url(#tile-dark); }
+        .sheet  { fill: #eaf1fa; }
+        .rule   { fill: #2b4a72; }
+        .credit { fill: #17877f; }
+      }
+    </style>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="#142438" class="tile" />
+  <rect x="15" y="11" width="34" height="42" rx="4" fill="#ffffff" class="sheet" />
+
+  <rect x="21" y="19" width="22" height="3" rx="1.5" fill="#26456b" class="rule" />
+  <rect x="21" y="26" width="22" height="3" rx="1.5" fill="#26456b" class="rule" />
+  <rect x="21" y="33" width="22" height="3" rx="1.5" fill="#26456b" class="rule" />
+
+  <!-- Equal, because they balance. -->
+  <rect x="21" y="42" width="9" height="4" rx="2" fill="#26456b" class="rule" />
+  <rect x="34" y="42" width="9" height="4" rx="2" fill="#0f6f6a" class="credit" />
+</svg>

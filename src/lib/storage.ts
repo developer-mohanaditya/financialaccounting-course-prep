@@ -87,3 +87,32 @@ export function clearProgress(): void {
     /* nothing else we can do locally */
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Backup and restore                                                  */
+/* ------------------------------------------------------------------ */
+
+/** The text a learner copies or downloads to keep their work safe. */
+export function exportProgress(state: ProgressState): string {
+  return JSON.stringify({ ...state, exportedAt: new Date().toISOString() }, null, 2);
+}
+
+/**
+ * Read a backup back.
+ *
+ * Everything goes through the same `migrate` used on load, so a backup from an
+ * older build, a truncated paste or a hand-edited file can only ever restore a
+ * clean state — never a malformed one that would break the studio later.
+ */
+export function parseProgress(text: string): ProgressState | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof parsed !== 'object') return null;
+  const candidate = parsed as Partial<ProgressState>;
+  if (!candidate.attempts || typeof candidate.attempts !== 'object') return null;
+  return migrate(parsed);
+}

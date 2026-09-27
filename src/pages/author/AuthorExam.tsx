@@ -1,11 +1,10 @@
-import { useState } from 'react';
 import { ContentTableView } from '../../components/QuestionBlocks';
 import { IconArrow, IconCheck } from '../../components/Icons';
 import { formatAmount, formatIsoDate, formatPoints } from '../../lib/format';
 import { explanationLines } from '../../lib/types';
 import type { MockExam, QuestionDef } from '../../lib/types';
 
-type Tab = 'paper' | 'key' | 'marking';
+export type Tab = 'paper' | 'key' | 'marking';
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'paper', label: 'Paper' },
@@ -15,16 +14,18 @@ const TABS: { id: Tab; label: string }[] = [
 
 export function AuthorExam({
   exam,
+  tab,
+  onTabChange,
   onBack,
   onOpenPaper,
-  onOpenSolutions,
 }: {
   exam: MockExam;
+  tab: Tab;
+  onTabChange: (tab: Tab) => void;
   onBack: () => void;
   onOpenPaper: () => void;
-  onOpenSolutions: () => void;
 }) {
-  const [tab, setTab] = useState<Tab>('paper');
+  const setTab = onTabChange;
 
   const mcqs = exam.sections
     .flatMap((section) => section.questionIds)
@@ -54,7 +55,7 @@ export function AuthorExam({
           <button type="button" className="btn btn-outline btn-sm" onClick={onOpenPaper}>
             Open paper <IconArrow />
           </button>
-          <button type="button" className="btn btn-primary btn-sm" onClick={onOpenSolutions}>
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => onTabChange('key')}>
             Open solutions
           </button>
         </div>

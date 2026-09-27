@@ -2,7 +2,7 @@ import { useStudio } from '../state/StudioContext';
 import { StatusBadge } from '../components/StatusBadge';
 import { IconArrow, IconLock } from '../components/Icons';
 import { formatLocalDateTime, formatPoints } from '../lib/format';
-import { examProgress } from '../lib/grading';
+import { examProgress } from '../lib/meters';
 
 export function Dashboard() {
   const { states, summary, navigate, answersFor, progress } = useStudio();

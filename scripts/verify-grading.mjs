@@ -16,7 +16,7 @@ execFileSync(
   path.join(root, 'node_modules', '.bin', 'tsc'),
   [
     path.join('src', 'data', 'exams', 'index.ts'),
-    path.join('src', 'lib', 'grading.ts'),
+    path.join('src', 'lib', 'marking.ts'),
     '--outDir',
     path.join('.verify', 'ts'),
     '--module',
@@ -34,7 +34,7 @@ writeFileSync(path.join(outDir, 'package.json'), JSON.stringify({ type: 'commonj
 
 const require = createRequire(import.meta.url);
 const { MOCK_EXAMS } = require(path.join(outDir, 'ts', 'data', 'exams', 'index.js'));
-const { gradeExam } = require(path.join(outDir, 'ts', 'lib', 'grading.js'));
+const { gradeExam } = require(path.join(outDir, 'ts', 'lib', 'marking.js'));
 
 const problems = [];
 const check = (label, actual, expected) => {

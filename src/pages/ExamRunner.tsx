@@ -4,7 +4,7 @@ import { Dialog } from '../components/Dialog';
 import { EntryTableBlock, McqBlock, ScheduleTableBlock } from '../components/QuestionBlocks';
 import { ChartOfAccountsAnnex } from '../components/ChartOfAccounts';
 import { IconClock } from '../components/Icons';
-import { examProgress, sectionProgress } from '../lib/grading';
+import { examProgress, sectionProgress } from '../lib/meters';
 import { formatDuration } from '../lib/format';
 import type { AttemptRecord, MockExam } from '../lib/types';
 
@@ -46,6 +46,7 @@ export function ExamRunner({ exam }: { exam: MockExam }) {
     pauseTimer,
     resumeTimer,
     submitExam,
+    grading,
   } = useStudio();
 
   const attempt = attemptFor(exam.id);
@@ -93,10 +94,14 @@ export function ExamRunner({ exam }: { exam: MockExam }) {
     node?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleSubmit = () => {
-    submitExam(exam);
+  // Marking happens on the server, so submission is neither instant nor
+  // guaranteed. On success the runner hands over to the results page; on failure
+  // the runner stays exactly where it is, because the answers are already saved
+  // and the only thing missing is the mark.
+  const handleSubmit = async () => {
     setConfirmOpen(false);
-    navigate({ name: 'results', examId: exam.id });
+    const result = await submitExam(exam);
+    if (result) navigate({ name: 'results', examId: exam.id });
   };
 
   return (
@@ -123,11 +128,9 @@ export function ExamRunner({ exam }: { exam: MockExam }) {
 
           <span className={`save-status${flash ? ' is-saving' : ''}`}>
             <span className="dot" /> Saved locally
-          </span>
-
-          <button type="button" className="btn btn-primary" onClick={() => setConfirmOpen(true)}>
-            Submit exam
-          </button>
+          </span>            <button type="button" className="btn btn-primary" onClick={() => setConfirmOpen(true)} disabled={grading.pending}>
+              Submit exam
+            </button>
         </div>
       </div>
 
@@ -239,6 +242,18 @@ export function ExamRunner({ exam }: { exam: MockExam }) {
         })}
 
         <section className="panel panel-pad">
+          {grading.failure && (
+            <div className="callout callout-danger mb" role="alert">
+              <div className="row gap-sm wrap" style={{ justifyContent: 'space-between' }}>
+                <span className="grow">{grading.failure.message}</span>
+                {grading.failure.retryable && (
+                  <button type="button" className="btn btn-outline btn-sm" onClick={handleSubmit}>
+                    Try again
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
           <div className="row gap wrap" style={{ justifyContent: 'space-between' }}>
             <div className="grow">
               <h3 style={{ marginBottom: 4 }}>
@@ -248,8 +263,8 @@ export function ExamRunner({ exam }: { exam: MockExam }) {
                 Submit the exam to receive your grade and unlock the solutions for this paper.
               </p>
             </div>
-            <button type="button" className="btn btn-primary btn-lg" onClick={() => setConfirmOpen(true)}>
-              Submit exam
+            <button type="button" className="btn btn-primary btn-lg" onClick={() => setConfirmOpen(true)} disabled={grading.pending}>
+              {grading.pending ? 'Marking…' : 'Submit exam'}
             </button>
           </div>
         </section>
@@ -261,11 +276,11 @@ export function ExamRunner({ exam }: { exam: MockExam }) {
           immediately and the solutions for this paper become available.
         </p>
         <div className="row gap-sm wrap" style={{ justifyContent: 'flex-end' }}>
-          <button type="button" className="btn btn-outline" onClick={() => setConfirmOpen(false)}>
+          <button type="button" className="btn btn-outline" onClick={() => setConfirmOpen(false)} disabled={grading.pending}>
             Continue editing
           </button>
-          <button type="button" className="btn btn-primary" onClick={handleSubmit}>
-            Submit exam
+          <button type="button" className="btn btn-primary" onClick={handleSubmit} disabled={grading.pending}>
+            {grading.pending ? 'Marking…' : 'Submit exam'}
           </button>
         </div>
       </Dialog>

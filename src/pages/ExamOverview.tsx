@@ -4,7 +4,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { Dialog } from '../components/Dialog';
 import { IconArrow, IconCheck, IconLock } from '../components/Icons';
 import { formatLocalDateTime, formatPoints } from '../lib/format';
-import { examProgress } from '../lib/grading';
+import { examProgress } from '../lib/meters';
 import { ChartOfAccountsAnnex } from '../components/ChartOfAccounts';
 import type { MockExam } from '../lib/types';
 

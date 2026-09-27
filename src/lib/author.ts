@@ -1,10 +1,21 @@
 /**
  * Author access.
  *
- * This studio is a static, browser-only application: there is no server that could
- * hold a secret, so this gate is not a security boundary. It keeps the content
- * console away from learners and, just as importantly, stays silent — nothing in
- * the study interface refers to it, names it or links to it.
+ * The content console reads full papers, so it is gated twice. The gate in this
+ * module decides whether the console is *built at all*: both credentials come
+ * from build-time environment variables and there is no fallback, so a build
+ * made without them simply has no way in. The gate on the server then decides
+ * whether a request is *allowed*, by comparing the key against
+ * AUTHOR_ACCESS_KEY in the deployment's environment.
+ *
+ * Splitting it this way means a leak can be closed without a redeploy: rotate
+ * AUTHOR_ACCESS_KEY and every deployed build stops working at once, because the
+ * server is the one that decides.
+ *
+ * What this is not: a way to keep a secret from someone who reads the bundle. A
+ * static client cannot do that. The protection is that the console has to be
+ * enabled deliberately, is reachable by URL only, is named nowhere in the study
+ * interface, and can be switched off centrally.
  *
  * Enter it by URL: `/admin`, or `#/admin` (which also works for the single-file
  * build opened straight from disk).
@@ -12,16 +23,18 @@
 
 import { useEffect, useState } from 'react';
 
-/** The one account allowed through the gate. */
-const AUTHOR_EMAIL = 'developer.mohanditya@gmail.com';
+const env = import.meta.env as Record<string, string | undefined>;
+
+/** Both values are absent in a build made without them; the console stays shut. */
+const AUTHOR_EMAIL = (env.VITE_AUTHOR_EMAIL ?? '').trim().toLowerCase();
+const ACCESS_KEY = (env.VITE_AUTHOR_ACCESS_KEY ?? '').trim();
 
 /**
- * Second factor, required so that knowing the address is not enough. Override it
- * for a build with `VITE_AUTHOR_ACCESS_KEY=...` in the environment.
+ * True when this build was given the credentials to open the console. Checked
+ * before anything is rendered, so a build without them carries no console code
+ * path a reader could follow.
  */
-const DEFAULT_ACCESS_KEY = 'fa-console-2026';
-
-const ACCESS_KEY = (import.meta.env?.VITE_AUTHOR_ACCESS_KEY as string | undefined)?.trim() || DEFAULT_ACCESS_KEY;
+export const authorConsoleEnabled = AUTHOR_EMAIL !== '' && ACCESS_KEY !== '';
 
 /**
  * Kept outside the study-progress key on purpose: clearing study progress must
@@ -36,12 +49,19 @@ export interface AuthorSession {
 
 /** Do these credentials belong to the author account? */
 export function areAuthorCredentials(email: string, key: string): boolean {
+  if (!authorConsoleEnabled) return false;
   const givenEmail = email.trim().toLowerCase();
   const givenKey = key.trim();
   return givenEmail === AUTHOR_EMAIL && givenKey === ACCESS_KEY;
 }
 
+/** The key the console presents to the server, for the content queries. */
+export function authorAccessKey(): string {
+  return ACCESS_KEY;
+}
+
 export function readAuthorSession(): AuthorSession | null {
+  if (!authorConsoleEnabled) return null;
   try {
     const raw = window.localStorage.getItem(AUTHOR_STORAGE_KEY);
     if (!raw) return null;
@@ -67,7 +87,7 @@ export function clearAuthorSession(): void {
   try {
     window.localStorage.removeItem(AUTHOR_STORAGE_KEY);
   } catch {
-    /* nothing else we can do locally */
+    /* storage blocked: nothing else we can do locally */
   }
 }
 

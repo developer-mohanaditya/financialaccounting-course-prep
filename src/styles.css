@@ -1357,3 +1357,32 @@ table.figures tr.emphasis td { font-weight: 620; background: var(--paper-sunken)
   .content { max-width: none; padding: 0; }
   body { background: #fff; }
 }
+
+/* Settings: the hidden file input behind "Restore from a file", and the
+   read-only backup text. Kept out of the layout until they are needed. */
+.visually-hidden-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.backup-text {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-sunken);
+  color: var(--ink);
+  resize: vertical;
+}
+
+.align-start { align-self: flex-start; }

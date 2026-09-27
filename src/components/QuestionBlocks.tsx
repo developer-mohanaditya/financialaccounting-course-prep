@@ -2,8 +2,8 @@ import type { ContentTable, EntryQuestion, McqQuestion, ScheduleQuestion } from 
 import { ACCOUNT_CATEGORIES } from '../lib/types';
 import { formatAmount } from '../lib/format';
 import type { EntryAnswer, QuestionResult } from '../lib/types';
-import { emptyEntryAnswer } from '../lib/grading';
-import { isEntryAnswerEmpty } from '../data/examKit';
+import { emptyEntryAnswer } from '../lib/answerSheet';
+import { isEntryAnswerEmpty } from '../lib/paperKit';
 import { ChartOfAccountsAnnex } from './ChartOfAccounts';
 import { IconCheck, IconCross } from './Icons';
 import { useState } from 'react';

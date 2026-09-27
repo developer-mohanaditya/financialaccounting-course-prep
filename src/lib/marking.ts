@@ -1,5 +1,9 @@
 /**
- * Grading engine.
+ * Marking engine — SERVER SIDE ONLY.
+ *
+ * This module is the reason the answer keys must not ship to the browser. It is
+ * imported by the backend grading function and by the offline verification
+ * scripts, and by nothing in the study interface.
  *
  * Scoring follows the Exam Training handout exactly:
  *
@@ -18,19 +22,19 @@
  *  Schedule items inside the case are marked per cell.
  */
 
+import { emptyEntryAnswer, isBlankEntryAnswer } from './answerSheet';
 import {
   accountNumberMatches,
   accountWordingMatches,
   amountsEqual,
   datesMatch,
-  parseAmount,
-} from './format';
+} from './matching';
+import { parseAmount } from './format';
 import type {
   AnswerSheet,
   CellFeedback,
   EntryAnswer,
   EntryQuestion,
-  ExamSection,
   GradedExam,
   LineFeedback,
   McqQuestion,
@@ -41,28 +45,6 @@ import type {
   SectionResult,
 } from './types';
 import { MCQ_SCORING } from './types';
-
-export function emptyEntryAnswer(): EntryAnswer {
-  return { date: '', category: '', number: '', wording: '', debit: '', credit: '' };
-}
-
-/**
- * A line the learner never wrote anything on. Blank lines are not attempts: they
- * cannot be paired with an expected line, they carry no marks, and they are left
- * off the graded script.
- */
-export function isBlankEntryAnswer(row: EntryAnswer): boolean {
-  return ![
-    row.date ?? '',
-    row.category ?? '',
-    row.number ?? '',
-    row.wording ?? '',
-    row.debit ?? '',
-    row.credit ?? '',
-  ]
-    .join('')
-    .trim();
-}
 
 /* ------------------------------------------------------------------ */
 /* Part One                                                            */
@@ -317,7 +299,7 @@ export function gradeSchedule(
 /* Whole exam                                                          */
 /* ------------------------------------------------------------------ */
 
-function roundPoints(value: number): number {
+export function roundPoints(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
@@ -360,83 +342,4 @@ export function gradeExam(exam: MockExam, answers: AnswerSheet): GradedExam {
     sections,
     questions,
   };
-}
-
-/* ------------------------------------------------------------------ */
-/* Progress helpers                                                    */
-/* ------------------------------------------------------------------ */
-
-/** Number of answer fields the learner has filled in, per section. */
-export function sectionProgress(
-  section: ExamSection,
-  questions: Record<string, QuestionDef>,
-  answers: AnswerSheet,
-): { answered: number; total: number } {
-  let answered = 0;
-  let total = 0;
-
-  for (const id of section.questionIds) {
-    const question = questions[id];
-    if (question.kind === 'mcq') {
-      total += 1;
-      if (answers.mcq?.[id]) answered += 1;
-      continue;
-    }
-    if (question.kind === 'entry') {
-      total += question.lines.length;
-      // Only substantive lines count as progress; a blank or half-blank row does not.
-      let filled = 0;
-      for (const row of answers.entries?.[id] ?? []) {
-        if (isBlankEntryAnswer(row)) continue;
-        if (row.number.trim() && (row.debit.trim() || row.credit.trim()) && row.wording.trim()) filled += 1;
-      }
-      answered += Math.min(filled, question.lines.length);
-      continue;
-    }
-    const gradable = question.rows.flatMap((row) =>
-      question.columns.filter((column) => row.cells[column.key] !== null && row.cells[column.key] !== undefined),
-    );
-    total += gradable.length;
-    const values = answers.schedules?.[id] ?? {};
-    for (const row of question.rows) {
-      for (const column of question.columns) {
-        const expected = row.cells[column.key];
-        if (expected === null || expected === undefined) continue;
-        if ((values[`${row.key}.${column.key}`] ?? '').trim() !== '') answered += 1;
-      }
-    }
-  }
-
-  return { answered, total };
-}
-
-export function examProgress(exam: MockExam, answers: AnswerSheet): { answered: number; total: number } {
-  return exam.sections.reduce(
-    (acc, section) => {
-      const part = sectionProgress(section, exam.questions, answers);
-      return { answered: acc.answered + part.answered, total: acc.total + part.total };
-    },
-    { answered: 0, total: 0 },
-  );
-}
-
-/** Which questions still have an unanswered required field. */
-export function unansweredQuestions(exam: MockExam, answers: AnswerSheet): string[] {
-  const out: string[] = [];
-  for (const section of exam.sections) {
-    for (const id of section.questionIds) {
-      const question = exam.questions[id];
-      if (question.kind === 'mcq') {
-        if (!answers.mcq?.[id]) out.push(id);
-        continue;
-      }
-      const part = sectionProgress(
-        { ...section, questionIds: [id] },
-        exam.questions,
-        answers,
-      );
-      if (part.answered < part.total) out.push(id);
-    }
-  }
-  return out;
 }
